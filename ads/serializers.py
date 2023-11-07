@@ -8,6 +8,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class AdSerializer(serializers.ModelSerializer):
+    locations = LocationSerializer(many=True, read_only=True)
     class Meta:
         model = Ad
-        fields = ('id', 'name', 'start_date', 'end_date', 'locations')
+        fields = ['id', 'name', 'start_date', 'end_date', 'locations']

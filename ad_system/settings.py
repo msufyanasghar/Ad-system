@@ -31,6 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin', # pip install django-jazzmin
+    'django_crontab',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +43,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'ads',
 ]
+
+CRONJOBS = [
+    ('0 0 * * *', 'ads.tasks.reset_daily_visitor'),
+]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -101,6 +109,50 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "Ad-System",
+
+    # Title on the brand, and login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_header": "Advertisement system",
+
+    # square logo to use for your site, must be present in static files, used for favicon and brand on top left
+    "site_logo": "",
+
+    # Welcome text on the login screen
+    "welcome_sign": "Welcome to Ad-System",
+
+    # Copyright on the footer
+    "copyright": "",
+
+    # The model admin to search from the search bar, search bar omitted if excluded
+    "search_model": "auth.User",
+
+    # Field name on user model that contains avatar image
+    "user_avatar": None,
+
+    # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
+    # "order_with_respect_to": ["accounts", "auth", "home", "product", ]
+    #
+
+    # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
+    "order_with_respect_to": ["accounts", "auth", "home"],
+
+    ############
+    # Top Menu #
+    ############
+
+    # Links to put along the top menu
+
+    # Custom icons for side menu apps/models See https://fontawesome.com/icons?d=gallery&m=free
+    # for a list of icon classes
+    "icons": {
+        "auth.Group": "fas fa-users",
+        "auth.user": "fas fa-user",
+
+
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -123,3 +175,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+

@@ -1,11 +1,12 @@
 from django.urls import path, include
+from django.urls import path
+from .views import LocationViewSet, AdViewSet
 from rest_framework.routers import DefaultRouter
-from .views import AdViewSet, LocationViewSet
 
 router = DefaultRouter()
-router.register(r'locations', LocationViewSet)
-router.register(r'ads', AdViewSet)
+router.register('locations', LocationViewSet)
+router.register('ads', AdViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-]
+    ]
