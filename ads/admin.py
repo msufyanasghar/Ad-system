@@ -3,12 +3,12 @@ from .models import Ad, Location
 
 # Register your models here.
 class Ad_Admin(admin.ModelAdmin):
-    list_display = ['name', 'start_date', 'end_date',]
+    list_display = ['id', 'name', 'start_date', 'end_date',]
 
 
 
 class Location_Admin(admin.ModelAdmin):
-    list_display = ['name', 'daily_visitors']
+    list_display = ['id', 'name', 'daily_visitors']
 
 
 admin.site.register(Ad, Ad_Admin)

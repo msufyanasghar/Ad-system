@@ -17,20 +17,42 @@ class AdViewSet(viewsets.ModelViewSet):
     queryset = Ad.objects.all()
     serializer_class = AdSerializer
 
-    def get_queryset(self):
-        queryset = super().get_queryset().filter(is_blocked=False, start_date__lte=date.today(), end_date__gte=date.today())
-        location = self.request.query_params.get('location')
-        location_object = get_object_or_404(Location, id=location)
-        if location:
-            queryset = queryset.filter(locations__id=location, location__daily_visitors__lt=location_object.daily_visitor_limit)
-            return queryset
-        return Response({'message':'Location parameter is required'},status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    def get_object(self):
-        instance = super().get_object()
-        location = self.request.query_params.get('location')
-        location_object = get_object_or_404(Location, id=location)
-        instance = get_object_or_404(Ad, id=instance.id, locations=location_object, daily_visitors__lt=location_object.daily_visitor_limit)
-        location_object.daily_visitors += 1
-        location_object.save()
-        return instance
+        locations = serializer.validated_data.get('locations', [])
+        for location in locations:
+            max_daily_visitors = location.max_daily_visitors
+            if max_daily_visitors and self._get_total_daily_visitors(location) > max_daily_visitors:
+                return Response(
+                    {"error": f"Exceeds maximum daily visitors limit for {location.name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        # Custom logic to handle location constraints on update
+        locations = serializer.validated_data.get('locations', instance.locations.all())
+        for location in locations:
+            max_daily_visitors = location.max_daily_visitors
+            # Check if the total daily visitors exceed the maximum allowed
+            if max_daily_visitors and self._get_total_daily_visitors(location) > max_daily_visitors:
+                return Response(
+                    {"error": f"Exceeds maximum daily visitors limit for {location.name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def _get_total_daily_visitors(self, location):
+        return 0
